@@ -42,15 +42,49 @@ app.post('/signin', (req, res) => {
   }
 });
 
+app.post('/register', (req, res) => {
+  const { email, password, name } = req.body;
+  database.users.push({
+    id: '125',
+    name: name,
+    email: email,
+    password: password,
+    entries: 0,
+    joined: new Date(),
+  });
+  res.json(database.users[database.users.length - 1]);
+});
+
+app.get('/profile/:id', (req, res) => {
+  const { id } = req.params;
+  let found = false;
+  database.users.forEach((user) => {
+    if (user.id === id) {
+      found = true;
+      return res.json(user);
+    }
+  });
+  if (!found) {
+    res.status(400).json('Not found');
+  }
+});
+
+app.put('/image', (req, res) => {
+  const { id } = req.body;
+  let found = false;
+
+  database.users.forEach((user) => {
+    if (user.id === id) {
+      found = true;
+      user.entries++;
+      return res.json(user.entries);
+    }
+  });
+  if (!found) {
+    res.status(400).json('Not found');
+  }
+});
+
 app.listen(3000, () => {
   console.log('listening now on port 3000');
 });
-
-/* Routes/Endpoints
-/ (root route)--> res = this is working
-/signin --> POST (create new users with json data) = res with either success/fail or return new created user object that will return
-/register --> POST (register new user add data to a DB or a variable for now) = new user object
-/profile/:userID --> GET = user (this will be for home screen)
-/image --> PUT => updated how many times a person adds a image = res user update
-
-*/
