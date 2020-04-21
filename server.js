@@ -4,7 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt-nodejs');
 const knex = require('knex');
 
-const postgres = knex({
+const db = knex({
   client: 'pg',
   connection: {
     host: '127.0.0.1',
@@ -13,8 +13,6 @@ const postgres = knex({
     database: 'facerecognitionapp',
   },
 });
-
-console.log(postgres.select('*').from('users'));
 
 const app = express();
 
@@ -68,28 +66,34 @@ app.post('/signin', (req, res) => {
 app.post('/register', (req, res) => {
   const { email, password, name } = req.body;
 
-  database.users.push({
-    id: '125',
-    name: name,
-    email: email,
-    entries: 0,
-    joined: new Date(),
-  });
-  res.json(database.users[database.users.length - 1]);
+  db('users')
+    .returning('*')
+    .insert({
+      email: email,
+      name: name,
+      joined: new Date(),
+    })
+    .then((user) => {
+      res.json(user[0]);
+    })
+    .catch((err) => res.status(400).json('Unable to register'));
 });
 
 app.get('/profile/:id', (req, res) => {
   const { id } = req.params;
-  let found = false;
-  database.users.forEach((user) => {
-    if (user.id === id) {
-      found = true;
-      return res.json(user);
-    }
-  });
-  if (!found) {
-    res.status(400).json('Not found');
-  }
+  db.select('*')
+    .from('users')
+    .where({
+      id,
+    })
+    .then((user) => {
+      if (user.length) {
+        res.json(user[0]);
+      } else {
+        res.status(400).json('Not found');
+      }
+    })
+    .catch((err) => res.status(400).json('error getting user'));
 });
 
 app.put('/image', (req, res) => {
