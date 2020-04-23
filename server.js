@@ -7,7 +7,7 @@ const knex = require('knex');
 const db = knex({
   client: 'pg',
   connection: {
-    host: '127.0.0.1',
+    host: 'postgresql-graceful-82433',
     user: 'postgres',
     password: 'test123',
     database: 'facerecognitionapp',
